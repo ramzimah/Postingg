@@ -1,0 +1,7 @@
+{
+    "mongoURI":"mongodb://ramzi:ramzi@cluster0-shard-00-00.mmgwv.mongodb.net:27017,cluster0-shard-00-01.mmgwv.mongodb.net:27017,cluster0-shard-00-02.mmgwv.mongodb.net:27017/blogApp?ssl=true&replicaSet=atlas-oksvrk-shard-0&authSource=admin&retryWrites=true&w=majority",
+    "jwtSecret":"mysecrettoken",
+    "nodeMail":"teamabapp@gmail.com",
+    "nodePassword":"teamabapp2021mantanou",
+    "domaineName":"http://localhost:8000"
+}
