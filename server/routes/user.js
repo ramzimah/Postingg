@@ -61,7 +61,7 @@ router.post(
 //login route
 
 router.post(
-  "/login",
+  "/signin",
   check("email", "please enter a valid email").isEmail(),
   check("password", "please enter a valid password ").isLength({ min: 6 }),
   async (req, res) => {
@@ -229,5 +229,8 @@ router.post(
     }
   }
 );
-
+// @route POST api/user/editProfile/
+// @desc a route to edit a comment on a specific blog by its id
+// @access private
+router.put("editprofile/:id", auth, async (req, res) => {});
 module.exports = router;

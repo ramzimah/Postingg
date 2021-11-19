@@ -15,7 +15,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
     },
     bio: {
-      type: Boolean,
+      type: String,
       default: null,
     },
     profilePic: {
