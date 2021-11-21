@@ -1,6 +1,5 @@
-const { UUID } = require("bson");
 const mongoose = require("mongoose");
-const BlogSchema = new mongoose.Schema(
+const ArticleSchema = new mongoose.Schema(
   {
     author: {
       type: mongoose.Schema.Types.ObjectId,
@@ -14,26 +13,32 @@ const BlogSchema = new mongoose.Schema(
     content: {
       type: String,
       required: true,
-      unique: true,
     },
     likes: [
       {
         user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "user",
-          default: null,
         },
+        _id: false,
       },
     ],
     comments: [
       {
-        commentId: { type: mongoose.Schema.Types.ObjectId },
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          auto: true,
+        },
         content: { type: "String" },
         user: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
-        default: null,
+        date: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },
   { timestamps: true }
 );
-module.exports = mongoose.model("blog", BlogSchema);
+module.exports = mongoose.model("article", ArticleSchema);

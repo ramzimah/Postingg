@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema(
   {
-    fullname: {
+    username: {
       type: String,
       required: true,
+      unique: true,
     },
     email: {
       type: String,
@@ -22,11 +23,13 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    savedBlogs: [
+    savedArticles: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "blog",
-        default: null,
+        article: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "article",
+        },
+        _id: false,
       },
     ],
   },

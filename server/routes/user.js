@@ -7,38 +7,45 @@ const createToken = require("../utils/createToken");
 const decodeToken = require("../utils/decodeToken");
 const auth = require("../middlewares/auth");
 const sendmail = require("../utils/sendMail");
+const validator = require("../middlewares/validator");
 
 const router = express.Router();
 //register team route
 router.post(
   "/signup",
-  check("fullname", "please enter ur name").notEmpty(),
-  check("email", "please enter ur email").isEmail(),
-  check(
-    "password",
-    "please enter a password with at least 6 caracters"
-  ).isLength({ min: 6 }),
+  [
+    check("username", "please enter ur name").notEmpty(),
+    check("email", "please enter ur email").isEmail(),
+    check(
+      "password",
+      "please enter a password with at least 6 caracters"
+    ).isLength({ min: 6 }),
+    validator,
+  ],
   async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const { fullname, password, email, bio } = req.body;
+    const { username, password, email, bio } = req.body;
 
     try {
-      //check if user exists
+      //check if user with the same email exists
       let user = await User.findOne({ email });
-      //check if team exists
+      //check if user with the same email exists
       if (user) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: "user already exists" }] });
+        return res.status(400).json({
+          errors: [{ msg: "user already exists with the same email" }],
+        });
+      }
+      //check if user with the same name exists
+      user = await User.findOne({ username });
+      //check if user with the same name exists
+      if (user) {
+        return res.status(400).json({
+          errors: [{ msg: "user already exists with the same username" }],
+        });
       }
 
       //create a user instace
       user = new User({
-        fullname,
+        username,
         email,
         password,
         bio,
@@ -54,7 +61,7 @@ router.post(
       res.json({ token });
     } catch (err) {
       console.log(err.message);
-      res.sendStatus(500).send("server error");
+      res.status(500).send("server error");
     }
   }
 );
@@ -62,13 +69,12 @@ router.post(
 
 router.post(
   "/signin",
-  check("email", "please enter a valid email").isEmail(),
-  check("password", "please enter a valid password ").isLength({ min: 6 }),
+  [
+    check("email", "please enter a valid email").isEmail(),
+    check("password", "please enter a valid password ").isLength({ min: 6 }),
+    validator,
+  ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
     const { email, password } = req.body;
     try {
       const user = await User.findOne({ email });
@@ -89,7 +95,7 @@ router.post(
       res.json({ token });
     } catch (err) {
       console.log(err.message);
-      res.sendStatus(500).send("server error");
+      res.status(500).send("server error");
     }
   }
 );
@@ -102,13 +108,9 @@ router.put(
     check("password", "please enter the actual password").exists(),
     check("newPassword", "please enter the new password").exists(),
     auth,
+    validator,
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
     const { password, newPassword } = req.body;
     try {
       const user = await User.findOne({ where: { id: req.id } });
@@ -132,7 +134,7 @@ router.put(
       return res.status(200).json({ success: true });
     } catch (err) {
       console.log(err.message);
-      res.sendStatus(500).send("server error");
+      res.status(500).send("server error");
     }
   }
 );
@@ -141,42 +143,37 @@ router.put(
 // @access public
 router.post(
   "/forgotpassword",
-  [check("email", "please enter your email ").isEmail()],
+  [check("email", "please enter your email ").isEmail(), validator],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
     try {
       const { email } = req.body;
-      const user = await User.findOne({ where: { email } });
-      const id = user.id;
+      const user = await User.findOne({ email });
+
       if (user) {
+        const id = user.id;
         const token = createToken({ id });
         const link = `${config.domaineName}/api/user/forgotpassword/${token}`;
         const mailHtml = `Please click the following link to change your password : <br>${link}`;
-        await sendmail("reset password of teamab ", mailHtml, email);
+        await sendmail("reset password of the blog app ", mailHtml, email);
+        return res.sendStatus(200);
       }
-      return res.sendStatus(200);
+      return res
+        .status(404)
+        .json({ errors: [{ msg: "there is no account with this email  " }] });
     } catch (err) {
       console.log(err.message);
-      res.sendStatus(500).send("server error");
+      res.status(500).send("server error");
     }
   }
 );
 router.get(
   "/forgotpassword/:token",
-  [param("token").isString()],
+  [param("token").isString(), validator],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
     try {
       const { token } = req.params;
-
       const { id } = await decodeToken(token);
-      const user = await User.findOne({ where: { id } });
+      const user = await User.findOne({ id });
       if (!user) {
         return res
           .status(404)
@@ -184,53 +181,109 @@ router.get(
       }
       const result = {
         id,
-        fullName: user.fullname,
+        username: user.username,
       };
 
       return res.status(200).json(result);
     } catch (err) {
       console.log(err.message);
-      res.sendStatus(500).send("server error");
+      res.status(500).send("server error");
     }
   }
 );
 
 router.post(
   "/forgotpassword/:token",
-  [check("password", "please enter your password "), param("token").isString()],
+  [
+    check("password", "please enter your password ").notEmpty(),
+    param("token").isString(),
+    validator,
+  ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
     try {
       const { token } = req.params;
       let { password } = req.body;
-
       const { id } = await decodeToken(token);
-      const user = await User.findOne({ where: { id } });
+      const user = await User.findOne({ id });
       if (!user) {
         return res
           .status(404)
           .json({ errors: [{ msg: "this user doesn't exist  " }] });
+      } else {
+        //encrypt password
+        const salt = await bcrypt.genSalt(10);
+        password = await bcrypt.hash(password, salt);
+        user.password = password;
+        await user.save();
+
+        const authToken = await createToken({ id });
+
+        return res.status(200).json({ token: authToken });
       }
-
-      //encrypt password
-      const salt = await bcrypt.genSalt(10);
-      password = await bcrypt.hash(password, salt);
-      await User.updateOne({ password }, { where: { id: user.id } });
-
-      const authToken = await createToken({ id });
-
-      return res.status(200).json({ token: authToken });
     } catch (err) {
       console.log(err.message);
-      res.sendStatus(500).send("server error");
+      res.status(500).send("server error");
     }
   }
 );
 // @route POST api/user/editProfile/
-// @desc a route to edit a comment on a specific blog by its id
+// @desc a route to edit a uswrProfile
 // @access private
-router.put("editprofile/:id", auth, async (req, res) => {});
+router.put("/editprofile", auth, async (req, res) => {
+  try {
+    const { username, bio, profilePic } = req.body;
+    const user = await User.findById({ _id: req.id });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ errors: [{ msg: "this user doesn't exist  " }] });
+    }
+    if (username) user.username = username;
+    if (bio) user.bio = bio;
+    if (profilePic) user.profilePic = profilePic;
+    await user.save();
+    return res.status(200).json(user);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send("server error");
+  }
+});
+// @route POST api/user/:id
+// @desc a route to get a specific user by his id)
+// @access public
+router.get("/list", async (req, res) => {
+  try {
+    const users = await User.find();
+    if (!users) {
+      return res.status(404).json({
+        errors: [{ msg: " no user registered yet" }],
+      });
+    }
+    return res.status(200).json({ users });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send("server error");
+  }
+});
+
+router.get(
+  "/:id",
+  [param("id", "valid user id is required").isMongoId(), validator],
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          errors: [{ msg: " the id is invalid, this user doesn't exist" }],
+        });
+      }
+      return res.status(200).json({ user });
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send("server error");
+    }
+  }
+);
+
 module.exports = router;
