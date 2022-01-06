@@ -30,7 +30,7 @@ router.post(
       let user = await User.findOne({ email });
       //check if user with the same email exists
       if (user) {
-        return res.status(400).json({
+        return res.status(409).json({
           errors: [{ msg: "user already exists with the same email" }],
         });
       }
@@ -38,7 +38,7 @@ router.post(
       user = await User.findOne({ username });
       //check if user with the same name exists
       if (user) {
-        return res.status(400).json({
+        return res.status(409).json({
           errors: [{ msg: "user already exists with the same username" }],
         });
       }
@@ -58,7 +58,7 @@ router.post(
       //return jsonwebtoken
       const id = user.id;
       const token = createToken({ id });
-      res.json({ token });
+      res.json({ token, user });
     } catch (err) {
       console.log(err.message);
       res.status(500).send("server error");
@@ -92,7 +92,7 @@ router.post(
       //return jsonwebtoken
       const id = user.id;
       const token = createToken({ id });
-      res.json({ token });
+      res.json({ token, id });
     } catch (err) {
       console.log(err.message);
       res.status(500).send("server error");
