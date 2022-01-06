@@ -30,7 +30,6 @@ router.post(
       await article.save();
       return res.status(200).json({ article });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -53,7 +52,6 @@ router.get(
       const articles = await Article.find({ author: id });
       return res.status(200).json({ articles });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -75,7 +73,6 @@ router.get(
       }
       return res.status(200).json({ article });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -106,7 +103,6 @@ router.put(
       await article.save();
       return res.status(200).json(article);
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -135,7 +131,6 @@ router.delete(
       await Article.findOneAndDelete({ id });
       return res.sendStatus(200);
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -167,7 +162,6 @@ router.put(
       await article.save();
       return res.status(200).json({ likes: article.likes });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -205,7 +199,6 @@ router.put(
       await article.save();
       return res.status(200).json({ likes: article.likes });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -242,7 +235,6 @@ router.put(
       await article.save();
       return res.status(200).json({ allComments: article.comments });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -292,7 +284,6 @@ router.put(
       await article.save();
       return res.status(200).json(article.comments[index]);
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -339,7 +330,6 @@ router.put(
       await article.save();
       return res.status(200).json(article.comments);
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -372,7 +362,6 @@ router.put(
       await user.save();
       return res.status(200).json({ savedarticles: user.savedArticles });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -412,7 +401,6 @@ router.put(
       await user.save();
       return res.status(200).json({ savedarticles: user.savedArticles });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }

@@ -60,7 +60,6 @@ router.post(
       const token = createToken({ id });
       res.json({ token, user });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -94,7 +93,6 @@ router.post(
       const token = createToken({ id });
       res.json({ token, id });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -133,7 +131,6 @@ router.put(
 
       return res.status(200).json({ success: true });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -161,7 +158,6 @@ router.post(
         .status(404)
         .json({ errors: [{ msg: "there is no account with this email  " }] });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -186,7 +182,6 @@ router.get(
 
       return res.status(200).json(result);
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -221,7 +216,6 @@ router.post(
         return res.status(200).json({ token: authToken });
       }
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
@@ -280,7 +274,6 @@ router.get(
       }
       return res.status(200).json({ user });
     } catch (err) {
-      console.log(err.message);
       res.status(500).send("server error");
     }
   }
