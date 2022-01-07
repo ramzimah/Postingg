@@ -21,7 +21,6 @@ module.exports = async (req, res, next) => {
     req.id = decoded.id;
     next();
   } catch (err) {
-    console.log(err.message);
     res.status(401).json({
       msg: "token invalid",
     });
